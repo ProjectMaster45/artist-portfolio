@@ -1,0 +1,162 @@
+export const themePresets = [
+  {
+    id: "gallery-light",
+    name: "Gallery Light",
+    description: "Warm art gallery whites with charcoal text and gold accents.",
+    mode: "light",
+    values: {
+      primaryColor: "#1C1C1E",
+      secondaryColor: "#F8F5F0",
+      accentColor: "#C9A84C",
+      backgroundColor: "#F8F5F0",
+      surfaceColor: "#FFFFFF",
+      textColor: "#1C1C1E",
+      mutedTextColor: "#4A4A5A",
+      borderColor: "#E8E8E8",
+      buttonRadius: "0px",
+      cardRadius: "0px",
+    },
+  },
+  {
+    id: "windows-light",
+    name: "Windows Light",
+    description: "Clean white surfaces, blue accent, and crisp neutral text.",
+    mode: "light",
+    values: {
+      primaryColor: "#202020",
+      secondaryColor: "#F3F3F3",
+      accentColor: "#0067C0",
+      backgroundColor: "#F3F3F3",
+      surfaceColor: "#FFFFFF",
+      textColor: "#1B1B1B",
+      mutedTextColor: "#5E5E5E",
+      borderColor: "#DADADA",
+      buttonRadius: "4px",
+      cardRadius: "8px",
+    },
+  },
+  {
+    id: "windows-dark",
+    name: "Windows Dark",
+    description: "Dark desktop-inspired interface with luminous blue accents.",
+    mode: "dark",
+    values: {
+      primaryColor: "#111111",
+      secondaryColor: "#202020",
+      accentColor: "#60CDFF",
+      backgroundColor: "#111111",
+      surfaceColor: "#1F1F1F",
+      textColor: "#F5F5F5",
+      mutedTextColor: "#C8C8C8",
+      borderColor: "#3A3A3A",
+      buttonRadius: "4px",
+      cardRadius: "8px",
+    },
+  },
+  {
+    id: "high-contrast",
+    name: "High Contrast",
+    description: "Maximum contrast for strong readability and accessibility.",
+    mode: "contrast",
+    values: {
+      primaryColor: "#000000",
+      secondaryColor: "#000000",
+      accentColor: "#FFFF00",
+      backgroundColor: "#000000",
+      surfaceColor: "#0A0A0A",
+      textColor: "#FFFFFF",
+      mutedTextColor: "#FFFFFF",
+      borderColor: "#FFFFFF",
+      buttonRadius: "0px",
+      cardRadius: "0px",
+    },
+  },
+  {
+    id: "ocean",
+    name: "Ocean",
+    description: "Cool blue-green palette for calm contemporary portfolios.",
+    mode: "light",
+    values: {
+      primaryColor: "#0F2E3D",
+      secondaryColor: "#EEF8F8",
+      accentColor: "#027C8E",
+      backgroundColor: "#EEF8F8",
+      surfaceColor: "#FFFFFF",
+      textColor: "#0F2E3D",
+      mutedTextColor: "#456873",
+      borderColor: "#CDE4E6",
+      buttonRadius: "6px",
+      cardRadius: "8px",
+    },
+  },
+  {
+    id: "forest",
+    name: "Forest",
+    description: "Natural greens, soft surfaces, and grounded typography.",
+    mode: "light",
+    values: {
+      primaryColor: "#1F3327",
+      secondaryColor: "#F3F7EF",
+      accentColor: "#5B7F45",
+      backgroundColor: "#F3F7EF",
+      surfaceColor: "#FFFFFF",
+      textColor: "#1F3327",
+      mutedTextColor: "#61705C",
+      borderColor: "#D9E4D0",
+      buttonRadius: "6px",
+      cardRadius: "8px",
+    },
+  },
+  {
+    id: "rose",
+    name: "Rose",
+    description: "Soft editorial pinks with deep berry accents.",
+    mode: "light",
+    values: {
+      primaryColor: "#3A1825",
+      secondaryColor: "#FFF3F6",
+      accentColor: "#B8325F",
+      backgroundColor: "#FFF3F6",
+      surfaceColor: "#FFFFFF",
+      textColor: "#3A1825",
+      mutedTextColor: "#7A5360",
+      borderColor: "#F0CCD8",
+      buttonRadius: "8px",
+      cardRadius: "8px",
+    },
+  },
+  {
+    id: "graphite",
+    name: "Graphite",
+    description: "Quiet monochrome theme for minimal photography and fine art.",
+    mode: "dark",
+    values: {
+      primaryColor: "#101010",
+      secondaryColor: "#181818",
+      accentColor: "#A6A6A6",
+      backgroundColor: "#101010",
+      surfaceColor: "#1A1A1A",
+      textColor: "#F4F4F4",
+      mutedTextColor: "#B8B8B8",
+      borderColor: "#343434",
+      buttonRadius: "2px",
+      cardRadius: "4px",
+    },
+  },
+];
+
+export const getThemePreset = (id) =>
+  themePresets.find((theme) => theme.id === id) || themePresets[0];
+
+export const buildThemeFromSettings = (settings = {}) => {
+  const safeSettings = settings && typeof settings === "object" ? settings : {};
+  const preset = getThemePreset(safeSettings.themePreset);
+
+  return {
+    ...preset.values,
+    ...Object.fromEntries(
+      Object.entries(safeSettings).filter(([, value]) => value !== undefined && value !== null && value !== "")
+    ),
+    themeMode: safeSettings.themeMode || preset.mode,
+  };
+};

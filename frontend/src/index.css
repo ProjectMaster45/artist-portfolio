@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .bg-white {
+    background-color: rgb(var(--theme-surface-rgb) / var(--tw-bg-opacity, 1));
+  }
+
+  .bg-charcoal {
+    background-color: rgb(var(--theme-primary-rgb) / var(--tw-bg-opacity, 1));
+  }
+
+  .hover\:bg-charcoal:hover {
+    background-color: rgb(var(--theme-primary-rgb) / var(--tw-bg-opacity, 1));
+  }
+}
+
+@layer base {
+  :root {
+    --theme-primary: #1C1C1E;
+    --theme-secondary: #F8F5F0;
+    --theme-accent: #C9A84C;
+    --theme-accent-light: #DEC06E;
+    --theme-accent-dark: #A07A28;
+    --theme-bg: #F8F5F0;
+    --theme-surface: #FFFFFF;
+    --theme-text: #1C1C1E;
+    --theme-muted: #4A4A5A;
+    --theme-border: #E8E8E8;
+    --theme-primary-rgb: 28 28 30;
+    --theme-secondary-rgb: 248 245 240;
+    --theme-accent-rgb: 201 168 76;
+    --theme-accent-light-rgb: 222 192 110;
+    --theme-accent-dark-rgb: 160 122 40;
+    --theme-bg-rgb: 248 245 240;
+    --theme-surface-rgb: 255 255 255;
+    --theme-text-rgb: 28 28 30;
+    --theme-muted-rgb: 74 74 90;
+    --theme-border-rgb: 232 232 232;
+    --theme-button-radius: 0px;
+    --theme-card-radius: 0px;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-body bg-ivory text-charcoal antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  /* Luxury button styles */
+  .btn-primary {
+    @apply bg-charcoal text-ivory px-6 py-3 text-sm font-label font-medium tracking-widest uppercase
+           hover:bg-slate transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2;
+    border-radius: var(--theme-button-radius);
+  }
+
+  .btn-secondary {
+    @apply border border-charcoal text-charcoal px-6 py-3 text-sm font-label font-medium tracking-widest uppercase
+           hover:bg-charcoal hover:text-ivory transition-all duration-300;
+    border-radius: var(--theme-button-radius);
+  }
+
+  .btn-gold {
+    @apply bg-gold text-white px-6 py-3 text-sm font-label font-medium tracking-widest uppercase
+           hover:bg-gold-dark transition-all duration-300;
+    border-radius: var(--theme-button-radius);
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white px-4 py-2 text-sm font-medium rounded
+           hover:bg-red-700 transition-colors duration-200;
+  }
+
+  /* Input styles */
+  .input-field {
+    @apply w-full border border-gray-200 bg-white px-4 py-3 text-sm text-charcoal placeholder-gray-400
+           focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-colors duration-200;
+    background: var(--theme-surface);
+    border-color: var(--theme-border);
+    border-radius: var(--theme-button-radius);
+  }
+
+  .textarea-field {
+    @apply w-full border border-gray-200 bg-white px-4 py-3 text-sm text-charcoal placeholder-gray-400
+           focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-colors duration-200 resize-none;
+    background: var(--theme-surface);
+    border-color: var(--theme-border);
+    border-radius: var(--theme-button-radius);
+  }
+
+  /* Card */
+  .card {
+    @apply bg-white shadow-sm hover:shadow-md transition-shadow duration-300;
+    background: var(--theme-surface);
+    border-radius: var(--theme-card-radius);
+  }
+
+  /* Section label */
+  .eyebrow {
+    @apply text-xs font-label font-medium tracking-[0.25em] uppercase text-gold;
+  }
+
+  /* Page section spacing */
+  .section {
+    @apply py-16 md:py-24;
+  }
+
+  .container-site {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Artwork image hover overlay */
+  .artwork-overlay {
+    @apply absolute inset-0 bg-charcoal bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-500 flex items-center justify-center;
+  }
+
+  /* Admin sidebar active link */
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
+           text-gray-400 hover:text-white hover:bg-white/10;
+  }
+
+  .sidebar-link.active {
+    @apply text-white bg-white/15;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--theme-accent);
+  border-radius: 3px;
+}
+
+/* Image aspect ratio helper */
+.aspect-artwork {
+  aspect-ratio: 4 / 5;
+}
