@@ -19,7 +19,10 @@ const ArtworkCard = ({ artwork, onPreview }) => {
 
   return (
     <article className="group animate-fade-in">
-      <div className="relative aspect-artwork overflow-hidden bg-white shadow-sm ring-1 ring-black/5 transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-xl">
+      <div
+        className="relative aspect-artwork overflow-hidden bg-white shadow-sm ring-1 ring-black/5 transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-xl"
+        style={{ borderRadius: "var(--theme-card-radius)" }}
+      >
         <Link to={`/artwork/${artwork._id}`} aria-label={`View ${artwork.title}`} className="block h-full">
           {thumbnail ? (
             <img

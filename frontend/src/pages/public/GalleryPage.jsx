@@ -106,8 +106,11 @@ const GalleryPage = () => {
 
       <section className="section bg-ivory">
         <div className="container-site">
-          <div className="sticky top-20 z-30 mb-8 bg-ivory/95 py-4 backdrop-blur supports-[backdrop-filter]:bg-ivory/80">
-            <div className="bg-white p-4 shadow-sm ring-1 ring-black/5">
+          <div className="mb-8 bg-ivory/95 py-4 backdrop-blur supports-[backdrop-filter]:bg-ivory/80 lg:sticky lg:top-20 lg:z-30">
+            <div
+              className="bg-white p-4 shadow-sm ring-1 ring-black/5"
+              style={{ borderRadius: "var(--theme-card-radius)" }}
+            >
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_220px_220px_auto]">
                 <div className="relative">
                   <input
@@ -179,14 +182,20 @@ const GalleryPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {Array.from({ length: 8 }, (_, index) => (
                 <div key={index} className="animate-pulse">
-                  <div className="aspect-artwork bg-white/80 ring-1 ring-black/5" />
+                  <div
+                    className="aspect-artwork bg-white/80 ring-1 ring-black/5"
+                    style={{ borderRadius: "var(--theme-card-radius)" }}
+                  />
                   <div className="mt-4 h-3 w-1/3 bg-white" />
                   <div className="mt-3 h-5 w-2/3 bg-white" />
                 </div>
               ))}
             </div>
           ) : artworks.length === 0 ? (
-            <div className="bg-white py-20 text-center shadow-sm ring-1 ring-black/5">
+            <div
+              className="bg-white py-20 text-center shadow-sm ring-1 ring-black/5"
+              style={{ borderRadius: "var(--theme-card-radius)" }}
+            >
               <p className="font-display text-3xl text-charcoal mb-3">No artworks found</p>
               <p className="text-slate/60 text-sm">Try adjusting your search or filters.</p>
               <button type="button" onClick={resetFilters} className="mt-6 btn-secondary">
