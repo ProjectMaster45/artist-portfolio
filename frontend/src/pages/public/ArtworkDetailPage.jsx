@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import PublicLayout from "../../components/public/PublicLayout";
+import BackButton from "../../components/shared/BackButton";
 import { publicDataAPI } from "../../services/publicData";
 import { submitNetlifyForm } from "../../services/netlifyForms";
 import { PageLoader } from "../../components/shared/LoadingSpinner";
@@ -58,10 +59,21 @@ const ArtworkDetailPage = () => {
   if (loading) return <PageLoader />;
   if (!artwork) return (
     <PublicLayout>
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="font-display text-3xl mb-4">Artwork not found</p>
-          <Link to="/gallery" className="btn-primary">Back to Gallery</Link>
+      <div className="pt-20 bg-white min-h-screen">
+        <div className="container-site py-12">
+          <BackButton
+            fallbackTo="/gallery"
+            ariaLabel="Back to Gallery"
+            className="mb-6"
+          >
+            Back to Gallery
+          </BackButton>
+
+          <div className="min-h-[50vh] flex items-center justify-center">
+            <div className="text-center">
+              <p className="font-display text-3xl mb-4">Artwork not found</p>
+            </div>
+          </div>
         </div>
       </div>
     </PublicLayout>
@@ -75,6 +87,14 @@ const ArtworkDetailPage = () => {
     <PublicLayout>
       <div className="pt-20 bg-white min-h-screen">
         <div className="container-site py-12">
+          <BackButton
+            fallbackTo="/gallery"
+            ariaLabel="Back to Gallery"
+            className="mb-6"
+          >
+            Back to Gallery
+          </BackButton>
+
           {/* Breadcrumb */}
           <nav className="mb-8 text-sm text-slate/60 font-label">
             <Link to="/gallery" className="hover:text-gold transition-colors">Gallery</Link>

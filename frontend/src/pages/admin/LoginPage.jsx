@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../components/shared/AuthContext";
+import BackButton from "../../components/shared/BackButton";
 import LoadingSpinner from "../../components/shared/LoadingSpinner";
 import toast from "react-hot-toast";
 
@@ -52,6 +53,15 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-charcoal flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        <BackButton
+          fallbackTo="/"
+          ariaLabel="Back to Home"
+          variant="dark"
+          className="mb-8"
+        >
+          Back to Home
+        </BackButton>
+
         <div className="text-center mb-10">
           <h1 className="font-display text-4xl font-light text-white mb-2">
             Artist Portfolio
