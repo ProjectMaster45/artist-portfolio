@@ -25,6 +25,7 @@ app.use("/api/profile", require("./routes/profile"));
 app.use("/api/artworks", require("./routes/artworks"));
 app.use("/api/inquiries", require("./routes/inquiries"));
 app.use("/api/settings", require("./routes/settings"));
+app.use("/api/public-data", require("./routes/publicData"));
 
 // Health check
 app.get("/api/health", (req, res) => {

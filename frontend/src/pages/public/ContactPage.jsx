@@ -3,7 +3,8 @@
 
 import { useState, useEffect } from "react";
 import PublicLayout from "../../components/public/PublicLayout";
-import { inquiryAPI, profileAPI, artworkAPI } from "../../services/api";
+import { publicDataAPI } from "../../services/publicData";
+import { submitNetlifyForm } from "../../services/netlifyForms";
 import LoadingSpinner from "../../components/shared/LoadingSpinner";
 import toast from "react-hot-toast";
 
@@ -18,12 +19,12 @@ const ContactPage = () => {
 
   useEffect(() => {
     Promise.all([
-      profileAPI.get(),
-      artworkAPI.getAll({ available: "true", limit: 100 }),
+      publicDataAPI.getProfile(),
+      publicDataAPI.getArtworks({ available: "true", limit: 100 }),
     ])
       .then(([profileRes, artworksRes]) => {
-        setProfile(profileRes.data.profile);
-        setArtworks(artworksRes.data.artworks);
+        setProfile(profileRes);
+        setArtworks(artworksRes.items || []);
       })
       .catch(console.error);
   }, []);
@@ -36,12 +37,14 @@ const ContactPage = () => {
     }
     setSubmitting(true);
     try {
-      await inquiryAPI.submit({
+      const selectedArtwork = artworks.find((artwork) => artwork._id === form.artworkId);
+      await submitNetlifyForm("contact", {
         name: form.name,
         email: form.email,
         phone: form.phone,
         message: form.message,
         artworkId: form.artworkId || undefined,
+        artworkTitle: selectedArtwork?.title || "General Enquiry",
       });
       toast.success("Message sent! Expect a reply within 1–2 days.");
       setForm({ name: "", email: "", phone: "", message: "", artworkId: "" });

@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { settingsAPI } from "../services/api";
+import { publicDataAPI } from "../services/publicData";
 
 // Simple module-level cache to avoid refetching on every mount
 let cachedSettings = null;
@@ -20,9 +21,13 @@ export const useSettings = () => {
     }
 
     if (!fetchPromise) {
-      fetchPromise = settingsAPI.get()
-        .then((res) => {
-          cachedSettings = res.data.settings;
+      const isAdminRoute = window.location.pathname.startsWith("/admin");
+      fetchPromise = (isAdminRoute
+        ? settingsAPI.get().then((res) => res.data.settings)
+        : publicDataAPI.getSettings()
+      )
+        .then((data) => {
+          cachedSettings = data;
           return cachedSettings;
         })
         .catch(() => null)

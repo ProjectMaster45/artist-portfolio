@@ -7,7 +7,7 @@ import PublicLayout from "../../components/public/PublicLayout";
 import ArtworkCard from "../../components/public/ArtworkCard";
 import ArtworkPreviewModal from "../../components/public/ArtworkPreviewModal";
 import LoadingSpinner from "../../components/shared/LoadingSpinner";
-import { artworkAPI } from "../../services/api";
+import { publicDataAPI } from "../../services/publicData";
 
 const formatPrice = (price) =>
   new Intl.NumberFormat("en-IN", {
@@ -52,9 +52,9 @@ const GalleryPage = () => {
       if (category !== "all") params.category = category;
       if (available !== "all") params.available = available;
 
-      const res = await artworkAPI.getAll(params);
-      setArtworks(res.data.artworks || []);
-      setPagination(res.data.pagination || {});
+      const res = await publicDataAPI.getArtworks(params);
+      setArtworks(res.items || []);
+      setPagination(res.pagination || {});
     } catch (err) {
       console.error("Gallery fetch error:", err);
     } finally {
@@ -63,8 +63,8 @@ const GalleryPage = () => {
   }, [search, category, available, page]);
 
   useEffect(() => {
-    artworkAPI.getCategories()
-      .then((res) => setCategories(res.data.categories || []))
+    publicDataAPI.getCategories()
+      .then((items) => setCategories(items || []))
       .catch(console.error);
   }, []);
 

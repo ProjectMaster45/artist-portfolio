@@ -4,7 +4,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import PublicLayout from "../../components/public/PublicLayout";
-import { artworkAPI, inquiryAPI } from "../../services/api";
+import { publicDataAPI } from "../../services/publicData";
+import { submitNetlifyForm } from "../../services/netlifyForms";
 import { PageLoader } from "../../components/shared/LoadingSpinner";
 import LoadingSpinner from "../../components/shared/LoadingSpinner";
 import toast from "react-hot-toast";
@@ -22,8 +23,11 @@ const ArtworkDetailPage = () => {
   });
 
   useEffect(() => {
-    artworkAPI.getById(id)
-      .then((res) => setArtwork(res.data.artwork))
+    publicDataAPI.getArtworkById(id)
+      .then((item) => {
+        if (!item) throw new Error("Artwork not found");
+        setArtwork(item);
+      })
       .catch(() => toast.error("Artwork not found"))
       .finally(() => setLoading(false));
   }, [id]);
@@ -36,7 +40,11 @@ const ArtworkDetailPage = () => {
     }
     setSubmitting(true);
     try {
-      await inquiryAPI.submit({ ...form, artworkId: artwork._id });
+      await submitNetlifyForm("artwork-inquiry", {
+        ...form,
+        artworkId: artwork._id,
+        artworkTitle: artwork.title,
+      });
       toast.success("Inquiry sent! The artist will be in touch soon.");
       setForm({ name: "", email: "", phone: "", message: "" });
       setShowInquiry(false);

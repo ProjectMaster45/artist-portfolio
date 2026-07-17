@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import PublicLayout from "../../components/public/PublicLayout";
-import { profileAPI } from "../../services/api";
+import { publicDataAPI } from "../../services/publicData";
 import { PageLoader } from "../../components/shared/LoadingSpinner";
 
 const AboutPage = () => {
@@ -11,8 +11,8 @@ const AboutPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    profileAPI.get()
-      .then((res) => setProfile(res.data.profile))
+    publicDataAPI.getProfile()
+      .then((data) => setProfile(data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);

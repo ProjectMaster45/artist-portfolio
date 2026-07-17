@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import PublicLayout from "../../components/public/PublicLayout";
 import ArtworkCard from "../../components/public/ArtworkCard";
 import ArtworkPreviewModal from "../../components/public/ArtworkPreviewModal";
-import { artworkAPI, profileAPI } from "../../services/api";
+import { publicDataAPI } from "../../services/publicData";
 import { useSettings } from "../../hooks/useSettings";
 
 const HomePage = () => {
@@ -18,21 +18,21 @@ const HomePage = () => {
 
   useEffect(() => {
     Promise.allSettled([
-      artworkAPI.getAll({ featured: "true", limit: 6 }),
-      artworkAPI.getAll({ limit: 8 }),
-      profileAPI.get(),
+      publicDataAPI.getArtworks({ featured: "true", limit: 6 }),
+      publicDataAPI.getArtworks({ limit: 8 }),
+      publicDataAPI.getProfile(),
     ])
       .then(([featuredRes, latestRes, profileRes]) => {
         if (featuredRes.status === "fulfilled") {
-          setFeatured(featuredRes.value.data.artworks || []);
+          setFeatured(featuredRes.value.items || []);
         }
 
         if (latestRes.status === "fulfilled") {
-          setLatestArtworks(latestRes.value.data.artworks || []);
+          setLatestArtworks(latestRes.value.items || []);
         }
 
         if (profileRes.status === "fulfilled") {
-          setProfile(profileRes.value.data.profile);
+          setProfile(profileRes.value);
         }
       })
       .catch(console.error)
