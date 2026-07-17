@@ -49,11 +49,11 @@ const generalRateLimiter = createJsonLimiter({
   reason: "general API rate limit exceeded",
 });
 
-// Security: limit Cloudinary-backed artwork upload endpoints.
+// Security: Allows up to 50 artwork uploads per hour per IP to support large portfolio updates while protecting the server from abuse.
 const uploadRateLimiter = createJsonLimiter({
   windowMs: readNumber("UPLOAD_RATE_LIMIT_WINDOW", ONE_HOUR),
-  max: readNumber("UPLOAD_RATE_LIMIT_MAX", 20),
-  message: "Upload limit exceeded. Please try later.",
+  max: readNumber("UPLOAD_RATE_LIMIT_MAX", 50),
+  message: "Upload limit exceeded. Please try again in one hour.",
   reason: "upload rate limit exceeded",
 });
 
