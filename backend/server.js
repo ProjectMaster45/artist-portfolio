@@ -3,19 +3,86 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 const connectDB = require("./config/db");
+const {
+  generalRateLimiter,
+  loginRateLimiter,
+} = require("./middleware/rateLimiter");
 
 const app = express();
 
+const getOrigin = (value) => {
+  if (!value) return null;
+
+  try {
+    return new URL(value).origin;
+  } catch (error) {
+    return value;
+  }
+};
+
+const connectSrc = [
+  "'self'",
+  getOrigin(process.env.FRONTEND_URL),
+  getOrigin(process.env.BACKEND_URL),
+  getOrigin(process.env.RENDER_EXTERNAL_URL),
+  "http://localhost:5173",
+  "http://localhost:5000",
+].filter(Boolean);
+
+// Security: hide Express and trust Render's proxy before IP-based rate limiting.
+app.disable("x-powered-by");
+app.set("trust proxy", 1);
+
 // Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Security: apply Helmet headers with an explicit production CSP.
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "blob:", "https://res.cloudinary.com"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        fontSrc: ["'self'", "data:"],
+        connectSrc,
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+    crossOriginEmbedderPolicy: true,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginOpenerPolicy: { policy: "same-origin" },
+    referrerPolicy: { policy: "no-referrer" },
+    dnsPrefetchControl: { allow: false },
+    frameguard: { action: "deny" },
+    hidePoweredBy: true,
+    hsts: true,
+    ieNoOpen: true,
+    noSniff: true,
+    originAgentCluster: true,
+    permittedCrossDomainPolicies: { permittedPolicies: "none" },
+    xssFilter: true,
+  })
+);
+
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   })
 );
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// Security: rate limit API traffic and login attempts with JSON-only responses.
+app.use("/api", generalRateLimiter);
+app.post("/api/auth/login", loginRateLimiter);
 
 // Routes
 app.use("/api/auth", require("./routes/auth"));

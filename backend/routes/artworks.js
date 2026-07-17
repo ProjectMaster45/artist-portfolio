@@ -5,6 +5,7 @@ const express = require("express");
 const router = express.Router();
 const Artwork = require("../models/Artwork");
 const { protect } = require("../middleware/auth");
+const { uploadRateLimiter } = require("../middleware/rateLimiter");
 const { uploadArtwork, cloudinary, getCloudinaryFileInfo } = require("../config/cloudinary");
 const { triggerStaticRebuild } = require("../utils/staticRebuild");
 
@@ -95,7 +96,7 @@ router.get("/:id", async (req, res) => {
 // @route   POST /api/artworks
 // @desc    Create new artwork with images
 // @access  Private
-router.post("/", protect, uploadArtwork.array("images", 10), async (req, res) => {
+router.post("/", uploadRateLimiter, protect, uploadArtwork.array("images", 10), async (req, res) => {
   try {
     const { title, description, category, price, medium, dimensions, isAvailable, isFeatured, year } = req.body;
 
@@ -165,7 +166,7 @@ router.put("/:id", protect, async (req, res) => {
 // @route   POST /api/artworks/:id/images
 // @desc    Add images to existing artwork
 // @access  Private
-router.post("/:id/images", protect, uploadArtwork.array("images", 10), async (req, res) => {
+router.post("/:id/images", uploadRateLimiter, protect, uploadArtwork.array("images", 10), async (req, res) => {
   try {
     const artwork = await Artwork.findById(req.params.id);
     if (!artwork) {
