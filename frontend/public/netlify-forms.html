@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Netlify Forms</title>
+  </head>
+  <body>
+    <!-- Static forms used only by Netlify form detection. -->
+    <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="contact" />
+      <input type="text" name="bot-field" />
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="text" name="phone" />
+      <input type="text" name="subject" />
+      <textarea name="message"></textarea>
+      <input type="text" name="inquiryType" />
+      <input type="text" name="sourcePage" />
+      <input type="text" name="artworkId" />
+      <input type="text" name="artworkTitle" />
+      <input type="text" name="artworkUrl" />
+    </form>
+
+    <form name="artwork-inquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="artwork-inquiry" />
+      <input type="text" name="bot-field" />
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="text" name="phone" />
+      <textarea name="message"></textarea>
+      <input type="text" name="inquiryType" />
+      <input type="text" name="sourcePage" />
+      <input type="text" name="artworkId" />
+      <input type="text" name="artworkTitle" />
+      <input type="text" name="artworkUrl" />
+      <input type="text" name="artworkImage" />
+    </form>
+  </body>
+</html>
