@@ -14,34 +14,38 @@
     />
   </head>
   <body>
-    <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
-      <input type="hidden" name="form-name" value="contact" />
-      <input type="text" name="bot-field" />
-      <input type="text" name="name" />
-      <input type="email" name="email" />
-      <input type="text" name="phone" />
-      <input type="text" name="subject" />
-      <input type="text" name="inquiryType" />
-      <input type="text" name="sourcePage" />
-      <input type="text" name="artworkId" />
-      <input type="text" name="artworkTitle" />
-      <input type="text" name="artworkUrl" />
-      <textarea name="message"></textarea>
-    </form>
-    <form name="artwork-inquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
-      <input type="hidden" name="form-name" value="artwork-inquiry" />
-      <input type="text" name="bot-field" />
-      <input type="text" name="name" />
-      <input type="email" name="email" />
-      <input type="text" name="phone" />
-      <input type="text" name="inquiryType" />
-      <input type="text" name="sourcePage" />
-      <input type="text" name="artworkId" />
-      <input type="text" name="artworkTitle" />
-      <input type="text" name="artworkUrl" />
-      <input type="text" name="artworkImage" />
-      <textarea name="message"></textarea>
-    </form>
+    <!-- Static forms used by Netlify form detection -->
+    <div hidden>
+      <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="contact" />
+        <input type="text" name="bot-field" />
+        <input type="text" name="name" />
+        <input type="email" name="email" />
+        <input type="text" name="phone" />
+        <input type="text" name="subject" />
+        <textarea name="message"></textarea>
+        <input type="text" name="inquiryType" />
+        <input type="text" name="sourcePage" />
+        <input type="text" name="artworkId" />
+        <input type="text" name="artworkTitle" />
+        <input type="text" name="artworkUrl" />
+      </form>
+
+      <form name="artwork-inquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="artwork-inquiry" />
+        <input type="text" name="bot-field" />
+        <input type="text" name="name" />
+        <input type="email" name="email" />
+        <input type="text" name="phone" />
+        <textarea name="message"></textarea>
+        <input type="text" name="inquiryType" />
+        <input type="text" name="sourcePage" />
+        <input type="text" name="artworkId" />
+        <input type="text" name="artworkTitle" />
+        <input type="text" name="artworkUrl" />
+        <input type="text" name="artworkImage" />
+      </form>
+    </div>
     <div id="root">
       <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#F8F5F0;color:#1C1C1E;font-family:Arial,sans-serif;padding:24px;text-align:center;">
         <div>
