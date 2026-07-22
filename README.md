@@ -26,6 +26,8 @@ Place this `README.md` at the project root, beside `frontend` and `backend`.
 - Admin-controlled website themes with preset palettes and custom colors
 - SEO metadata, theme colors, and maintenance mode settings
 - Inquiry/contact form
+- Static public portfolio data for fast public pages
+- Netlify Forms support for public contact and artwork inquiries
 - Admin activity logs
 - MongoDB Atlas database support
 
@@ -81,9 +83,12 @@ artist-portfolio/
     package.json
     server.js
     seed-admin.js
+    utils/
   frontend/
     public/
+      data/
     src/
+    scripts/
     .env.example
     package.json
 ```
@@ -118,6 +123,14 @@ TOTP_ENCRYPTION_KEY=replace_with_another_long_random_secret
 MAX_FAILED_LOGIN_ATTEMPTS=5
 ACCOUNT_LOCK_MINUTES=15
 
+# Rate limiting (window values are in milliseconds)
+LOGIN_RATE_LIMIT_WINDOW=900000
+LOGIN_RATE_LIMIT_MAX=5
+GENERAL_RATE_LIMIT_WINDOW=900000
+GENERAL_RATE_LIMIT_MAX=100
+UPLOAD_RATE_LIMIT_WINDOW=3600000
+UPLOAD_RATE_LIMIT_MAX=50
+
 # Cloudinary
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
@@ -129,6 +142,13 @@ ADMIN_PASSWORD=your_strong_initial_password
 
 # Frontend URL for CORS
 FRONTEND_URL=http://localhost:5173
+
+# Backend URL for security headers in deployed environments
+BACKEND_URL=http://localhost:5000
+
+# Optional static public data export and rebuild hook
+PUBLIC_DATA_EXPORT_KEY=optional_shared_secret
+NETLIFY_BUILD_HOOK_URL=https://api.netlify.com/build_hooks/...
 ```
 
 Start the backend:
@@ -173,6 +193,10 @@ Create `frontend/.env` from `frontend/.env.example`:
 
 ```env
 VITE_API_URL=http://localhost:5000/api
+
+# Optional override for static public data generation
+PUBLIC_DATA_API_URL=http://localhost:5000/api
+PUBLIC_DATA_EXPORT_KEY=optional_shared_secret
 ```
 
 Start the frontend:
@@ -385,6 +409,8 @@ cd frontend
 npm run build
 ```
 
+The frontend build runs `scripts/generate-public-data.mjs` before Vite. If `PUBLIC_DATA_API_URL` or `VITE_API_URL` is configured, the script fetches the latest static portfolio snapshot from `/api/public-data` and writes `frontend/public/data/portfolio.json`. If neither API URL is configured, it keeps the existing snapshot.
+
 Preview frontend build:
 
 ```bash
@@ -472,6 +498,14 @@ Activity:
 GET /api/activity
 ```
 
+Public data:
+
+```text
+GET /api/public-data
+```
+
+This endpoint exports the public snapshot used by the static frontend. If `PUBLIC_DATA_EXPORT_KEY` is set on the backend, requests must include the same value in the `x-static-export-key` header.
+
 Inquiries:
 
 ```text
@@ -481,6 +515,20 @@ GET    /api/inquiries/:id
 PATCH  /api/inquiries/:id/read
 DELETE /api/inquiries/:id
 ```
+
+Public contact and artwork inquiry forms submit through Netlify Forms in the current static public architecture. The `/api/inquiries` routes still exist for stored MongoDB inquiries and admin/history workflows.
+
+## Static Public Site Flow
+
+Public visitors load portfolio content from:
+
+```text
+frontend/public/data/portfolio.json
+```
+
+Admin changes still go through the backend and MongoDB. When artwork, profile, or settings data changes, the backend calls `NETLIFY_BUILD_HOOK_URL` if it is configured. Netlify then runs the frontend build, regenerates `portfolio.json`, and deploys the updated static site.
+
+See `STATIC_PUBLIC_ARCHITECTURE.md` for the fuller deployment notes.
 
 ## Production Deployment
 
@@ -508,12 +556,21 @@ JWT_EXPIRES_IN=7d
 TOTP_ENCRYPTION_KEY=your_separate_long_random_totp_encryption_secret
 MAX_FAILED_LOGIN_ATTEMPTS=5
 ACCOUNT_LOCK_MINUTES=15
+LOGIN_RATE_LIMIT_WINDOW=900000
+LOGIN_RATE_LIMIT_MAX=5
+GENERAL_RATE_LIMIT_WINDOW=900000
+GENERAL_RATE_LIMIT_MAX=100
+UPLOAD_RATE_LIMIT_WINDOW=3600000
+UPLOAD_RATE_LIMIT_MAX=50
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 ADMIN_EMAIL=your_admin_email
 ADMIN_PASSWORD=strong_initial_password
 FRONTEND_URL=https://yourdomain.com
+BACKEND_URL=https://api.yourdomain.com
+NETLIFY_BUILD_HOOK_URL=https://api.netlify.com/build_hooks/...
+PUBLIC_DATA_EXPORT_KEY=optional_shared_secret
 ```
 
 Backend start command:
@@ -528,6 +585,8 @@ Set this environment variable on the frontend host:
 
 ```env
 VITE_API_URL=https://api.yourdomain.com/api
+PUBLIC_DATA_API_URL=https://api.yourdomain.com/api
+PUBLIC_DATA_EXPORT_KEY=optional_shared_secret
 ```
 
 Build command:
@@ -752,9 +811,12 @@ http://localhost:5173/admin/login
 - Frontend deploy works
 - `VITE_API_URL` points to deployed backend
 - `FRONTEND_URL` points to deployed frontend
+- `BACKEND_URL` points to deployed backend
+- Static public data build/export works
+- Netlify build hook is configured if public pages should auto-refresh after admin edits
 - Admin user is seeded
 - Admin login works
 - Artwork upload works
 - Public gallery shows uploaded artwork images
-- Contact form creates inquiries
+- Contact and artwork inquiry forms submit through Netlify Forms
 - Domain and HTTPS are active

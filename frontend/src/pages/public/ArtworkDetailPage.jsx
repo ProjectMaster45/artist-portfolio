@@ -1,15 +1,24 @@
 // pages/public/ArtworkDetailPage.jsx
-// Single artwork — large image gallery, details, inquiry form
+// Single artwork detail page with gallery and inquiry form.
 
-import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import PublicLayout from "../../components/public/PublicLayout";
 import BackButton from "../../components/shared/BackButton";
 import { publicDataAPI } from "../../services/publicData";
 import { submitNetlifyForm } from "../../services/netlifyForms";
+import { validateInquiryForm } from "../../services/inquiryValidation";
 import { PageLoader } from "../../components/shared/LoadingSpinner";
 import LoadingSpinner from "../../components/shared/LoadingSpinner";
 import toast from "react-hot-toast";
+
+const emptyInquiryForm = {
+  name: "",
+  email: "",
+  phone: "",
+  message: "",
+  botField: "",
+};
 
 const ArtworkDetailPage = () => {
   const { id } = useParams();
@@ -18,10 +27,9 @@ const ArtworkDetailPage = () => {
   const [activeImage, setActiveImage] = useState(0);
   const [showInquiry, setShowInquiry] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
-  const [form, setForm] = useState({
-    name: "", email: "", phone: "", message: "",
-  });
+  const [errors, setErrors] = useState({});
+  const [sent, setSent] = useState(false);
+  const [form, setForm] = useState(emptyInquiryForm);
 
   useEffect(() => {
     publicDataAPI.getArtworkById(id)
@@ -33,69 +41,90 @@ const ArtworkDetailPage = () => {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!form.name || !form.email || !form.message) {
-      toast.error("Please fill in all required fields");
+  const updateField = (field, value) => {
+    setForm((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: undefined, form: undefined }));
+    setSent(false);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (submitting || !artwork) return;
+
+    const { data, errors: validationErrors, isValid } = validateInquiryForm(form);
+    if (!isValid) {
+      setErrors(validationErrors);
+      toast.error(validationErrors.form || "Please check the highlighted fields.");
       return;
     }
+
     setSubmitting(true);
     try {
       await submitNetlifyForm("artwork-inquiry", {
-        ...form,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        message: data.message,
+        inquiryType: "artwork",
+        sourcePage: window.location.href,
         artworkId: artwork._id,
         artworkTitle: artwork.title,
+        artworkUrl: window.location.href,
+        artworkImage: artwork.images?.[0]?.url,
       });
-      toast.success("Inquiry sent! The artist will be in touch soon.");
-      setForm({ name: "", email: "", phone: "", message: "" });
-      setShowInquiry(false);
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to send inquiry");
+
+      toast.success("Thank you. Your inquiry has been sent successfully.");
+      setSent(true);
+      setErrors({});
+      setForm(emptyInquiryForm);
+    } catch {
+      const message = "We could not send your inquiry. Please try again.";
+      setErrors({ form: message });
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
   };
 
   if (loading) return <PageLoader />;
-  if (!artwork) return (
-    <PublicLayout>
-      <div className="pt-20 bg-white min-h-screen">
-        <div className="container-site py-12">
-          <BackButton
-            fallbackTo="/gallery"
-            ariaLabel="Back to Gallery"
-            className="mb-6"
-          >
-            Back to Gallery
-          </BackButton>
 
-          <div className="min-h-[50vh] flex items-center justify-center">
-            <div className="text-center">
-              <p className="font-display text-3xl mb-4">Artwork not found</p>
+  if (!artwork) {
+    return (
+      <PublicLayout>
+        <div className="pt-20 bg-white min-h-screen">
+          <div className="container-site py-12">
+            <BackButton fallbackTo="/gallery" ariaLabel="Back to Gallery" className="mb-6">
+              Back to Gallery
+            </BackButton>
+
+            <div className="min-h-[50vh] flex items-center justify-center">
+              <div className="text-center">
+                <p className="font-display text-3xl mb-4">Artwork not found</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </PublicLayout>
-  );
+      </PublicLayout>
+    );
+  }
 
   const formattedPrice = new Intl.NumberFormat("en-IN", {
-    style: "currency", currency: "INR", maximumFractionDigits: 0,
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
   }).format(artwork.price);
+
+  const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+  const primaryImage = artwork.images?.[0]?.url || "";
 
   return (
     <PublicLayout>
       <div className="pt-20 bg-white min-h-screen">
         <div className="container-site py-12">
-          <BackButton
-            fallbackTo="/gallery"
-            ariaLabel="Back to Gallery"
-            className="mb-6"
-          >
+          <BackButton fallbackTo="/gallery" ariaLabel="Back to Gallery" className="mb-6">
             Back to Gallery
           </BackButton>
 
-          {/* Breadcrumb */}
           <nav className="mb-8 text-sm text-slate/60 font-label">
             <Link to="/gallery" className="hover:text-gold transition-colors">Gallery</Link>
             <span className="mx-2">/</span>
@@ -103,33 +132,32 @@ const ArtworkDetailPage = () => {
           </nav>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-            {/* ── Image Gallery ───────────────────────────── */}
             <div>
-              {/* Main Image */}
               <div className="aspect-artwork bg-gray-50 overflow-hidden mb-4">
                 {artwork.images?.[activeImage]?.url ? (
                   <img
                     src={artwork.images[activeImage].url}
-                    alt={`${artwork.title} — image ${activeImage + 1}`}
+                    alt={`${artwork.title} image ${activeImage + 1}`}
                     className="w-full h-full object-contain"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-gray-200 text-8xl">🖼</span>
+                    <span className="text-gray-200 text-8xl">&#128444;</span>
                   </div>
                 )}
               </div>
 
-              {/* Thumbnails */}
               {artwork.images?.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto pb-2">
-                  {artwork.images.map((img, i) => (
+                  {artwork.images.map((img, index) => (
                     <button
-                      key={i}
-                      onClick={() => setActiveImage(i)}
+                      key={img.publicId || img.url || index}
+                      type="button"
+                      onClick={() => setActiveImage(index)}
                       className={`flex-shrink-0 w-16 h-16 overflow-hidden border-2 transition-all ${
-                        i === activeImage ? "border-gold" : "border-transparent opacity-60 hover:opacity-100"
+                        index === activeImage ? "border-gold" : "border-transparent opacity-60 hover:opacity-100"
                       }`}
+                      aria-label={`View artwork image ${index + 1}`}
                     >
                       <img src={img.url} alt="" className="w-full h-full object-cover" />
                     </button>
@@ -138,24 +166,20 @@ const ArtworkDetailPage = () => {
               )}
             </div>
 
-            {/* ── Details ─────────────────────────────────── */}
             <div className="flex flex-col">
               <p className="eyebrow mb-3">{artwork.category}</p>
               <h1 className="font-display text-4xl md:text-5xl font-light text-charcoal mb-4 leading-tight">
                 {artwork.title}
               </h1>
 
-              {/* Availability badge */}
               <span className={`self-start text-xs font-label tracking-widest uppercase px-3 py-1 mb-6 ${
                 artwork.isAvailable ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
               }`}>
                 {artwork.isAvailable ? "Available for Enquiry" : "Not Available for Enquiry"}
               </span>
 
-              {/* Price */}
               <p className="font-display text-3xl text-charcoal mb-8">{formattedPrice}</p>
 
-              {/* Metadata */}
               <div className="grid grid-cols-2 gap-4 mb-8 border-t border-b border-gray-100 py-6">
                 {artwork.medium && (
                   <div>
@@ -177,40 +201,150 @@ const ArtworkDetailPage = () => {
                 )}
               </div>
 
-              {/* Description */}
               {artwork.description && (
                 <p className="text-slate leading-relaxed mb-8 font-light">{artwork.description}</p>
               )}
 
-              {/* Inquiry Button */}
               {artwork.isAvailable && (
                 <button
-                  onClick={() => setShowInquiry(!showInquiry)}
+                  type="button"
+                  onClick={() => {
+                    setShowInquiry(!showInquiry);
+                    setErrors({});
+                  }}
                   className="btn-gold self-start"
                 >
                   {showInquiry ? "Close Inquiry Form" : "Send an Enquiry"}
                 </button>
               )}
 
-              {/* ── Inline Inquiry Form ──────────────────── */}
               {showInquiry && (
-                <form onSubmit={handleSubmit} className="mt-8 border border-gray-100 p-6 animate-slide-up">
-                  <h3 className="font-display text-xl mb-4">Enquire about "{artwork.title}"</h3>
+                <form
+                  name="artwork-inquiry"
+                  method="POST"
+                  data-netlify="true"
+                  netlify-honeypot="bot-field"
+                  noValidate
+                  onSubmit={handleSubmit}
+                  className="mt-8 border border-gray-100 p-6 animate-slide-up"
+                >
+                  <input type="hidden" name="form-name" value="artwork-inquiry" />
+                  <input type="hidden" name="inquiryType" value="artwork" />
+                  <input type="hidden" name="sourcePage" value={currentUrl} />
+                  <input type="hidden" name="artworkId" value={artwork._id} />
+                  <input type="hidden" name="artworkTitle" value={artwork.title} />
+                  <input type="hidden" name="artworkUrl" value={currentUrl} />
+                  <input type="hidden" name="artworkImage" value={primaryImage} />
+                  <div className="hidden" aria-hidden="true">
+                    <label>
+                      Do not fill this out
+                      <input
+                        name="bot-field"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        value={form.botField}
+                        onChange={(event) => updateField("botField", event.target.value)}
+                      />
+                    </label>
+                  </div>
+
+                  <h3 className="font-display text-xl mb-2">Send an Enquiry</h3>
+                  <p className="text-sm text-slate/70 mb-4">Inquiry about: {artwork.title}</p>
+                  {sent && (
+                    <p className="mb-4 border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                      Thank you. Your inquiry has been sent successfully.
+                    </p>
+                  )}
+                  {errors.form && (
+                    <p className="mb-4 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                      {errors.form}
+                    </p>
+                  )}
+
                   <div className="space-y-4">
-                    <input type="text" placeholder="Your Name *" value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      className="input-field" required />
-                    <input type="email" placeholder="Your Email *" value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      className="input-field" required />
-                    <input type="tel" placeholder="Phone (optional)" value={form.phone}
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                      className="input-field" />
-                    <textarea placeholder="Your message *" value={form.message}
-                      onChange={(e) => setForm({ ...form, message: e.target.value })}
-                      className="textarea-field" rows={4} required />
-                    <button type="submit" disabled={submitting} className="btn-primary w-full flex items-center justify-center gap-2">
-                      {submitting ? <><LoadingSpinner size="sm" light />Sending…</> : "Send Enquiry"}
+                    <div>
+                      <label htmlFor="artwork-inquiry-name" className="text-xs font-label tracking-widest uppercase text-slate/60 block mb-1">
+                        Name *
+                      </label>
+                      <input
+                        id="artwork-inquiry-name"
+                        name="name"
+                        type="text"
+                        value={form.name}
+                        onChange={(event) => updateField("name", event.target.value)}
+                        aria-invalid={Boolean(errors.name)}
+                        aria-describedby={errors.name ? "artwork-inquiry-name-error" : undefined}
+                        className="input-field"
+                        required
+                        maxLength={100}
+                      />
+                      {errors.name && <p id="artwork-inquiry-name-error" className="mt-1 text-xs text-red-600">{errors.name}</p>}
+                    </div>
+
+                    <div>
+                      <label htmlFor="artwork-inquiry-email" className="text-xs font-label tracking-widest uppercase text-slate/60 block mb-1">
+                        Email *
+                      </label>
+                      <input
+                        id="artwork-inquiry-email"
+                        name="email"
+                        type="email"
+                        value={form.email}
+                        onChange={(event) => updateField("email", event.target.value)}
+                        aria-invalid={Boolean(errors.email)}
+                        aria-describedby={errors.email ? "artwork-inquiry-email-error" : undefined}
+                        className="input-field"
+                        required
+                        maxLength={254}
+                      />
+                      {errors.email && <p id="artwork-inquiry-email-error" className="mt-1 text-xs text-red-600">{errors.email}</p>}
+                    </div>
+
+                    <div>
+                      <label htmlFor="artwork-inquiry-phone" className="text-xs font-label tracking-widest uppercase text-slate/60 block mb-1">
+                        Phone
+                      </label>
+                      <input
+                        id="artwork-inquiry-phone"
+                        name="phone"
+                        type="tel"
+                        value={form.phone}
+                        onChange={(event) => updateField("phone", event.target.value)}
+                        aria-invalid={Boolean(errors.phone)}
+                        aria-describedby={errors.phone ? "artwork-inquiry-phone-error" : undefined}
+                        className="input-field"
+                        maxLength={30}
+                      />
+                      {errors.phone && <p id="artwork-inquiry-phone-error" className="mt-1 text-xs text-red-600">{errors.phone}</p>}
+                    </div>
+
+                    <div>
+                      <label htmlFor="artwork-inquiry-message" className="text-xs font-label tracking-widest uppercase text-slate/60 block mb-1">
+                        Message *
+                      </label>
+                      <textarea
+                        id="artwork-inquiry-message"
+                        name="message"
+                        value={form.message}
+                        onChange={(event) => updateField("message", event.target.value)}
+                        aria-invalid={Boolean(errors.message)}
+                        aria-describedby={errors.message ? "artwork-inquiry-message-error" : undefined}
+                        className="textarea-field"
+                        rows={4}
+                        required
+                        maxLength={3000}
+                        placeholder="Your message"
+                      />
+                      {errors.message && <p id="artwork-inquiry-message-error" className="mt-1 text-xs text-red-600">{errors.message}</p>}
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      aria-busy={submitting}
+                      className="btn-primary w-full flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {submitting ? <><LoadingSpinner size="sm" light />Sending...</> : "Send Enquiry"}
                     </button>
                   </div>
                 </form>

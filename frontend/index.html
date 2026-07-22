@@ -14,20 +14,32 @@
     />
   </head>
   <body>
-    <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="contact" />
+      <input type="text" name="bot-field" />
       <input type="text" name="name" />
       <input type="email" name="email" />
       <input type="text" name="phone" />
+      <input type="text" name="subject" />
+      <input type="text" name="inquiryType" />
+      <input type="text" name="sourcePage" />
       <input type="text" name="artworkId" />
       <input type="text" name="artworkTitle" />
+      <input type="text" name="artworkUrl" />
       <textarea name="message"></textarea>
     </form>
-    <form name="artwork-inquiry" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <form name="artwork-inquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="artwork-inquiry" />
+      <input type="text" name="bot-field" />
       <input type="text" name="name" />
       <input type="email" name="email" />
       <input type="text" name="phone" />
+      <input type="text" name="inquiryType" />
+      <input type="text" name="sourcePage" />
       <input type="text" name="artworkId" />
       <input type="text" name="artworkTitle" />
+      <input type="text" name="artworkUrl" />
+      <input type="text" name="artworkImage" />
       <textarea name="message"></textarea>
     </form>
     <div id="root">

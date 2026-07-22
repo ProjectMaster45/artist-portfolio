@@ -9,6 +9,7 @@ export const submitNetlifyForm = async (formName, data) => {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: encodeForm({
       "form-name": formName,
+      "bot-field": "",
       ...data,
     }),
   });
